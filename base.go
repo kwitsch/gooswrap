@@ -1,6 +1,8 @@
 package gooswrap
 
 import (
+	oos "os"
+
 	"github.com/spf13/afero"
 )
 
@@ -12,7 +14,8 @@ type WrapperStore struct {
 }
 
 type VirtualData struct {
-	Env map[string]string
+	Env      map[string]string
+	Hostname string
 }
 
 var Wrapper *WrapperStore
@@ -61,9 +64,13 @@ func newWrapper(virtual bool) {
 }
 
 func newVirtualData() *VirtualData {
-	res := VirtualData{
-		Env: make(map[string]string),
+	hostname := "virtual"
+	if thn, err := oos.Hostname(); err == nil {
+		hostname = thn
 	}
 
-	return &res
+	return &VirtualData{
+		Env:      make(map[string]string),
+		Hostname: hostname,
+	}
 }
