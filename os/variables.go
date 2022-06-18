@@ -1,32 +1,39 @@
 package os
 
 import (
-	"errors"
-	"io/fs"
 	oos "os"
-	"syscall"
+
+	"github.com/spf13/afero"
 )
 
 var (
 	// ErrInvalid indicates an invalid argument.
 	// Methods on File will return this error when the receiver is nil.
-	ErrInvalid = fs.ErrInvalid // "invalid argument"
+	ErrInvalid = oos.ErrInvalid // "invalid argument"
 
-	ErrPermission = fs.ErrPermission // "permission denied"
-	ErrExist      = fs.ErrExist      // "file already exists"
-	ErrNotExist   = fs.ErrNotExist   // "file does not exist"
-	ErrClosed     = fs.ErrClosed     // "file already closed"
+	ErrPermission = oos.ErrPermission // "permission denied"
+	ErrExist      = oos.ErrExist      // "file already exists"
+	ErrNotExist   = oos.ErrNotExist   // "file does not exist"
+	ErrClosed     = oos.ErrClosed     // "file already closed"
 
 	ErrNoDeadline       = oos.ErrNoDeadline       // "file type does not support deadline"
 	ErrDeadlineExceeded = oos.ErrDeadlineExceeded // "i/o timeout"
 )
 
 var (
-	Stdin  = oos.NewFile(uintptr(syscall.Stdin), "/dev/stdin")
-	Stdout = oos.NewFile(uintptr(syscall.Stdout), "/dev/stdout")
-	Stderr = oos.NewFile(uintptr(syscall.Stderr), "/dev/stderr")
+	Stdin  = oos.Stdin
+	Stdout = oos.Stdout
+	Stderr = oos.Stderr
 )
 
 var Args []string
 
-var ErrProcessDone = errors.New("os: process already finished")
+var ErrProcessDone = oos.ErrProcessDone
+
+var (
+	ErrFileClosed = afero.ErrFileClosed
+	ErrOutOfRange = afero.ErrOutOfRange
+	ErrTooLarge   = afero.ErrTooLarge
+	ErrNoReadlink = afero.ErrNoReadlink
+	ErrNoSymlink  = afero.ErrNoSymlink
+)
