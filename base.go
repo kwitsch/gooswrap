@@ -2,6 +2,7 @@ package gooswrap
 
 import (
 	oos "os"
+	"path"
 
 	"github.com/spf13/afero"
 )
@@ -16,6 +17,7 @@ type WrapperStore struct {
 type VirtualData struct {
 	Env      map[string]string
 	Hostname string
+	Path     string
 }
 
 var Wrapper *WrapperStore
@@ -72,5 +74,10 @@ func newVirtualData() *VirtualData {
 	return &VirtualData{
 		Env:      make(map[string]string),
 		Hostname: hostname,
+		Path:     "/",
 	}
+}
+
+func (ws *WrapperStore) GetDir(dir string) string {
+	return path.Join(ws.Data.Path, dir)
 }
