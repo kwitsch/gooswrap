@@ -7,8 +7,8 @@ import (
 	. "github.com/kwitsch/gooswrap"
 )
 
-func InitEnv() {
-	if IsVirtual() {
+func SyncEnv() error {
+	return onlyWhenVirtual(func() {
 		oenv := oos.Environ()
 		for _, ec := range oenv {
 			es := strings.Split(ec, "=")
@@ -16,5 +16,20 @@ func InitEnv() {
 				Wrapper.Data.Env[es[0]] = es[1]
 			}
 		}
+	})
+}
+
+func SetHostname(hostname string) error {
+	return onlyWhenVirtual(func() {
+		Wrapper.Data.Hostname = hostname
+	})
+}
+
+func onlyWhenVirtual(action func()) error {
+	if IsVirtual() {
+		action()
+		return nil
 	}
+
+	return ErrNotVirtual
 }
