@@ -1,6 +1,7 @@
 package os
 
 import (
+	"errors"
 	oos "os"
 
 	"github.com/spf13/afero"
@@ -36,4 +37,6 @@ var (
 	ErrTooLarge   = afero.ErrTooLarge
 	ErrNoReadlink = afero.ErrNoReadlink
 	ErrNoSymlink  = afero.ErrNoSymlink
+	ErrNoLink     = errors.New("link not supported")
+	ErrNoPipe     = errors.New("pipe not supported")
 )
