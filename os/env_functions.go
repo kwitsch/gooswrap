@@ -9,10 +9,10 @@ import (
 
 // Clearenv deletes all environment variables.
 func Clearenv() {
-	if !IsVirtual() {
+	if !Wrapper.IsVirtual() {
 		oos.Clearenv()
 	} else {
-		Wrapper.Data.Env = make(map[string]string)
+		Wrapper.Virtual.Data.Env = make(map[string]string)
 	}
 }
 
@@ -20,12 +20,12 @@ func Clearenv() {
 // in the form "key=value".
 func Environ() []string {
 	var res []string
-	if !IsVirtual() {
+	if !Wrapper.IsVirtual() {
 		res = oos.Environ()
 	} else {
-		res = make([]string, len(Wrapper.Data.Env))
+		res = make([]string, len(Wrapper.Virtual.Data.Env))
 		i := 0
-		for k, v := range Wrapper.Data.Env {
+		for k, v := range Wrapper.Virtual.Data.Env {
 			res[i] = fmt.Sprintf("%s=%s", k, v)
 			i++
 		}
@@ -44,10 +44,10 @@ func ExpandEnv(s string) string {
 // It returns the value, which will be empty if the variable is not present.
 // To distinguish between an empty value and an unset value, use LookupEnv.
 func Getenv(key string) string {
-	if !IsVirtual() {
+	if !Wrapper.IsVirtual() {
 		return oos.Getenv(key)
 	} else {
-		if v, ok := Wrapper.Data.Env[key]; ok {
+		if v, ok := Wrapper.Virtual.Data.Env[key]; ok {
 			return v
 		} else {
 			return ""
@@ -61,10 +61,10 @@ func Getenv(key string) string {
 // Otherwise the returned value will be empty and the boolean will
 // be false.
 func LookupEnv(key string) (string, bool) {
-	if !IsVirtual() {
+	if !Wrapper.IsVirtual() {
 		return oos.LookupEnv(key)
 	} else {
-		v, ok := Wrapper.Data.Env[key]
+		v, ok := Wrapper.Virtual.Data.Env[key]
 		return v, ok
 	}
 }
@@ -72,20 +72,20 @@ func LookupEnv(key string) (string, bool) {
 // Setenv sets the value of the environment variable named by the key.
 // It returns an error, if any.
 func Setenv(key, value string) error {
-	if !IsVirtual() {
+	if !Wrapper.IsVirtual() {
 		return oos.Setenv(key, value)
 	} else {
-		Wrapper.Data.Env[key] = value
+		Wrapper.Virtual.Data.Env[key] = value
 		return nil
 	}
 }
 
 // Unsetenv unsets a single environment variable.
 func Unsetenv(key string) error {
-	if !IsVirtual() {
+	if !Wrapper.IsVirtual() {
 		return oos.Unsetenv(key)
 	} else {
-		delete(Wrapper.Data.Env, key)
+		delete(Wrapper.Virtual.Data.Env, key)
 		return nil
 	}
 }

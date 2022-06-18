@@ -3,6 +3,7 @@ package gooswrap
 import (
 	oos "os"
 	"path"
+	"strings"
 
 	"github.com/spf13/afero"
 )
@@ -10,7 +11,11 @@ import (
 type WrapperStore struct {
 	Fs      afero.Fs
 	Util    *afero.Afero
-	Virtual *bool
+	Virtual *Virtual
+}
+
+type Virtual struct {
+	virtual *bool
 	Data    *VirtualData
 }
 
@@ -31,13 +36,9 @@ func ToVirtual() {
 }
 
 func ToOs() {
-	if *Wrapper.Virtual {
+	if Wrapper.IsVirtual() {
 		newWrapper(false)
 	}
-}
-
-func IsVirtual() bool {
-	return *Wrapper.Virtual
 }
 
 func newWrapper(virtual bool) {
@@ -52,17 +53,19 @@ func newWrapper(virtual bool) {
 		Fs: fs,
 	}
 
-	wrap := WrapperStore{
-		Fs:      fs,
-		Util:    &util,
-		Virtual: &virtual,
+	v := Virtual{
+		virtual: &virtual,
 	}
 
 	if virtual {
-		wrap.Data = newVirtualData()
+		v.Data = newVirtualData()
 	}
 
-	Wrapper = &wrap
+	Wrapper = &WrapperStore{
+		Fs:      fs,
+		Util:    &util,
+		Virtual: &v,
+	}
 }
 
 func newVirtualData() *VirtualData {
@@ -78,6 +81,41 @@ func newVirtualData() *VirtualData {
 	}
 }
 
-func (ws *WrapperStore) GetDir(dir string) string {
-	return path.Join(ws.Data.Path, dir)
+func (ws *WrapperStore) IsVirtual() bool {
+	return *Wrapper.Virtual.virtual
+}
+
+func (ws *WrapperStore) GetPath(fpath string) string {
+	if strings.HasPrefix(fpath, "/") {
+		return fpath
+	} else {
+		return path.Join(ws.Virtual.Data.Path, fpath)
+	}
+}
+
+func (ws *WrapperStore) SyncEnv() error {
+	return ws.onlyWhenVirtual(func() {
+		oenv := oos.Environ()
+		for _, ec := range oenv {
+			es := strings.Split(ec, "=")
+			if len(es) == 2 {
+				Wrapper.Virtual.Data.Env[es[0]] = es[1]
+			}
+		}
+	})
+}
+
+func (ws *WrapperStore) SetHostname(hostname string) error {
+	return ws.onlyWhenVirtual(func() {
+		Wrapper.Virtual.Data.Hostname = hostname
+	})
+}
+
+func (ws *WrapperStore) onlyWhenVirtual(action func()) error {
+	if ws.IsVirtual() {
+		action()
+		return nil
+	}
+
+	return ErrNotVirtual
 }

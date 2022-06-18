@@ -1,4 +1,4 @@
-package virtual
+package gooswrap
 
 import "errors"
 
