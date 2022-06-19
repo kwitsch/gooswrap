@@ -137,12 +137,48 @@ func (v *Virtual) SetHostname(hostname string) error {
 	})
 }
 
+// create TempDir, UserCacheDir, UserConfigDir & UserHomeDir
+// returns ErrNotVirtual if Wrapper isen't in virtual mode
+func (v *Virtual) InitDirectories() error {
+	return v.onlyWhenVirtualReturn(func() error {
+		if err := Wrapper.Fs.MkdirAll(oos.TempDir(), 0777); err != nil {
+			return err
+		}
+		if ucd, err := oos.UserCacheDir(); err != nil {
+			if err := Wrapper.Fs.MkdirAll(ucd, 0777); err != nil {
+				return err
+			}
+		}
+		if ucd, err := oos.UserConfigDir(); err != nil {
+			if err := Wrapper.Fs.MkdirAll(ucd, 0777); err != nil {
+				return err
+			}
+		}
+		if uhd, err := oos.UserHomeDir(); err != nil {
+			if err := Wrapper.Fs.MkdirAll(uhd, 0777); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 // executes action if in virtual mode
 // returns ErrNotVirtual if not in virtual mode
 func (v *Virtual) onlyWhenVirtual(action func()) error {
 	if v.IsVirtual() {
 		action()
 		return nil
+	}
+
+	return ErrNotVirtual
+}
+
+// executes action if in virtual mode and returns its error
+// returns ErrNotVirtual if not in virtual mode
+func (v *Virtual) onlyWhenVirtualReturn(action func() error) error {
+	if v.IsVirtual() {
+		return action()
 	}
 
 	return ErrNotVirtual
