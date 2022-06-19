@@ -10,7 +10,7 @@ type VirtualData struct {
 	// pseudo environment
 	Env map[string]string
 	// editable hostname
-	Hostname string
+	hostname string
 }
 
 // returns new virtual data store
@@ -21,8 +21,24 @@ func newVirtualData() *VirtualData {
 	}
 	return &VirtualData{
 		Env:      make(map[string]string),
-		Hostname: hostname,
+		hostname: hostname,
 	}
+}
+
+// set virtual hostname
+// returns ErrNotVirtual if Wrapper isen't in virtual mode
+func (v *VirtualData) SetHostname(hostname string) error {
+	return onlyWhenVirtual(v, func() {
+		Wrapper.Virtual.hostname = hostname
+	})
+}
+
+// get virtual hostname
+// returns ErrNotVirtual if Wrapper isen't in virtual mode
+func (v *VirtualData) Hostname() (string, error) {
+	return onlyWhenVirtualStringError(v, func() (string, error) {
+		return v.hostname, nil
+	})
 }
 
 // sync current os environment variables to virtual environment variables
@@ -39,35 +55,21 @@ func (v *VirtualData) SyncEnv() error {
 	})
 }
 
-// set virtual hostname
-// returns ErrNotVirtual if Wrapper isen't in virtual mode
-func (v *VirtualData) SetHostname(hostname string) error {
-	return onlyWhenVirtual(v, func() {
-		Wrapper.Virtual.Hostname = hostname
-	})
-}
-
 // create TempDir, UserCacheDir, UserConfigDir & UserHomeDir
 // returns ErrNotVirtual if Wrapper isen't in virtual mode
 func (v *VirtualData) InitDirectories() error {
 	return onlyWhenVirtualError(v, func() error {
-		if err := Wrapper.Fs.MkdirAll(oos.TempDir(), 0777); err != nil {
+		if err := Wrapper.Fs.MkdirAll(VirtualTempDir, 0777); err != nil {
 			return err
 		}
-		if ucd, err := oos.UserCacheDir(); err != nil {
-			if err := Wrapper.Fs.MkdirAll(ucd, 0777); err != nil {
-				return err
-			}
+		if err := Wrapper.Fs.MkdirAll(VirtualUserCacheDir, 0777); err != nil {
+			return err
 		}
-		if ucd, err := oos.UserConfigDir(); err != nil {
-			if err := Wrapper.Fs.MkdirAll(ucd, 0777); err != nil {
-				return err
-			}
+		if err := Wrapper.Fs.MkdirAll(VirtualUserConfigDir, 0777); err != nil {
+			return err
 		}
-		if uhd, err := oos.UserHomeDir(); err != nil {
-			if err := Wrapper.Fs.MkdirAll(uhd, 0777); err != nil {
-				return err
-			}
+		if err := Wrapper.Fs.MkdirAll(VirtualUserHomeDir, 0777); err != nil {
+			return err
 		}
 		return nil
 	})
@@ -92,4 +94,14 @@ func onlyWhenVirtualError(v *VirtualData, action func() error) error {
 	}
 
 	return ErrNotVirtual
+}
+
+// executes action if in virtual mode and returns its error
+// returns ErrNotVirtual if not in virtual mode
+func onlyWhenVirtualStringError(v *VirtualData, action func() (string, error)) (string, error) {
+	if v != nil {
+		return action()
+	}
+
+	return "", ErrNotVirtual
 }
