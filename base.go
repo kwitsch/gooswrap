@@ -3,6 +3,7 @@ package gooswrap
 import (
 	oos "os"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/afero"
@@ -80,7 +81,8 @@ func (ws *WrapperStore) IsVirtual() bool {
 
 // get file path prefixed with current working directory if it doesen't start with a slash
 func (ws *WrapperStore) GetPath(fpath string) string {
-	if strings.HasPrefix(fpath, "/") {
+	match, _ := regexp.MatchString("^[A-Z]:.*", fpath)
+	if match || strings.HasPrefix(fpath, "/") {
 		return fpath
 	} else {
 		return path.Join(ws.WorkingDirectory, fpath)
