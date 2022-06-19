@@ -12,7 +12,7 @@ func Clearenv() {
 	if !Wrapper.IsVirtual() {
 		oos.Clearenv()
 	} else {
-		Wrapper.Virtual.Data.Env = make(map[string]string)
+		Wrapper.Virtual.Env = make(map[string]string)
 	}
 }
 
@@ -23,9 +23,9 @@ func Environ() []string {
 	if !Wrapper.IsVirtual() {
 		res = oos.Environ()
 	} else {
-		res = make([]string, len(Wrapper.Virtual.Data.Env))
+		res = make([]string, len(Wrapper.Virtual.Env))
 		i := 0
-		for k, v := range Wrapper.Virtual.Data.Env {
+		for k, v := range Wrapper.Virtual.Env {
 			res[i] = fmt.Sprintf("%s=%s", k, v)
 			i++
 		}
@@ -47,7 +47,7 @@ func Getenv(key string) string {
 	if !Wrapper.IsVirtual() {
 		return oos.Getenv(key)
 	} else {
-		if v, ok := Wrapper.Virtual.Data.Env[key]; ok {
+		if v, ok := Wrapper.Virtual.Env[key]; ok {
 			return v
 		} else {
 			return ""
@@ -64,7 +64,7 @@ func LookupEnv(key string) (string, bool) {
 	if !Wrapper.IsVirtual() {
 		return oos.LookupEnv(key)
 	} else {
-		v, ok := Wrapper.Virtual.Data.Env[key]
+		v, ok := Wrapper.Virtual.Env[key]
 		return v, ok
 	}
 }
@@ -75,7 +75,7 @@ func Setenv(key, value string) error {
 	if !Wrapper.IsVirtual() {
 		return oos.Setenv(key, value)
 	} else {
-		Wrapper.Virtual.Data.Env[key] = value
+		Wrapper.Virtual.Env[key] = value
 		return nil
 	}
 }
@@ -85,7 +85,7 @@ func Unsetenv(key string) error {
 	if !Wrapper.IsVirtual() {
 		return oos.Unsetenv(key)
 	} else {
-		delete(Wrapper.Virtual.Data.Env, key)
+		delete(Wrapper.Virtual.Env, key)
 		return nil
 	}
 }

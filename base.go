@@ -14,18 +14,10 @@ type WrapperStore struct {
 	Fs afero.Fs
 	// afero ioutil
 	Util *afero.Afero
-	// virtual data store
-	Virtual *Virtual
-}
-
-// working mode indicator and data store
-type Virtual struct {
-	// is the current wrapper in virtual mode
-	virtual *bool
 	// current working directory
 	WorkingDirectory string
-	// data store for virtual mode
-	Data *VirtualData
+	// virtual data store
+	Virtual *VirtualData
 }
 
 // data store for virtual mode
@@ -69,19 +61,16 @@ func newWrapper(virtual bool) {
 		Fs: fs,
 	}
 
-	vs := Virtual{
-		virtual: &virtual,
+	wrapper := WrapperStore{
+		Fs:   fs,
+		Util: &util,
 	}
 
 	if virtual {
-		vs.Data = newVirtualData()
+		wrapper.Virtual = newVirtualData()
 	}
 
-	Wrapper = &WrapperStore{
-		Fs:      fs,
-		Util:    &util,
-		Virtual: &vs,
-	}
+	Wrapper = &wrapper
 }
 
 // returns new virtual data store
@@ -98,12 +87,7 @@ func newVirtualData() *VirtualData {
 
 // Is the Wrapper virtual
 func (ws *WrapperStore) IsVirtual() bool {
-	return ws.Virtual.IsVirtual()
-}
-
-// is the Virtual object virtual
-func (v *Virtual) IsVirtual() bool {
-	return *v.virtual
+	return (ws.Virtual != nil)
 }
 
 // get file path prefixed with current working directory if it doesen't start with a slash
@@ -111,19 +95,19 @@ func (ws *WrapperStore) GetPath(fpath string) string {
 	if strings.HasPrefix(fpath, "/") {
 		return fpath
 	} else {
-		return path.Join(ws.Virtual.WorkingDirectory, fpath)
+		return path.Join(ws.WorkingDirectory, fpath)
 	}
 }
 
 // sync current os environment variables to virtual environment variables
 // returns ErrNotVirtual if Wrapper isen't in virtual mode
-func (v *Virtual) SyncEnv() error {
-	return v.onlyWhenVirtual(func() {
+func (v *VirtualData) SyncEnv() error {
+	return onlyWhenVirtual(v, func() {
 		oenv := oos.Environ()
 		for _, ec := range oenv {
 			es := strings.Split(ec, "=")
 			if len(es) == 2 {
-				v.Data.Env[es[0]] = es[1]
+				v.Env[es[0]] = es[1]
 			}
 		}
 	})
@@ -131,16 +115,16 @@ func (v *Virtual) SyncEnv() error {
 
 // set virtual hostname
 // returns ErrNotVirtual if Wrapper isen't in virtual mode
-func (v *Virtual) SetHostname(hostname string) error {
-	return v.onlyWhenVirtual(func() {
-		Wrapper.Virtual.Data.Hostname = hostname
+func (v *VirtualData) SetHostname(hostname string) error {
+	return onlyWhenVirtual(v, func() {
+		Wrapper.Virtual.Hostname = hostname
 	})
 }
 
 // create TempDir, UserCacheDir, UserConfigDir & UserHomeDir
 // returns ErrNotVirtual if Wrapper isen't in virtual mode
-func (v *Virtual) InitDirectories() error {
-	return v.onlyWhenVirtualReturn(func() error {
+func (v *VirtualData) InitDirectories() error {
+	return onlyWhenVirtualError(v, func() error {
 		if err := Wrapper.Fs.MkdirAll(oos.TempDir(), 0777); err != nil {
 			return err
 		}
@@ -165,8 +149,8 @@ func (v *Virtual) InitDirectories() error {
 
 // executes action if in virtual mode
 // returns ErrNotVirtual if not in virtual mode
-func (v *Virtual) onlyWhenVirtual(action func()) error {
-	if v.IsVirtual() {
+func onlyWhenVirtual(v *VirtualData, action func()) error {
+	if v != nil {
 		action()
 		return nil
 	}
@@ -176,8 +160,8 @@ func (v *Virtual) onlyWhenVirtual(action func()) error {
 
 // executes action if in virtual mode and returns its error
 // returns ErrNotVirtual if not in virtual mode
-func (v *Virtual) onlyWhenVirtualReturn(action func() error) error {
-	if v.IsVirtual() {
+func onlyWhenVirtualError(v *VirtualData, action func() error) error {
+	if v != nil {
 		return action()
 	}
 
