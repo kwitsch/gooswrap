@@ -45,11 +45,14 @@ func ReadFile(filename string) ([]byte, error) {
 // random string to the end. If pattern includes a "*", the random string
 // replaces the last "*". TempDir returns the name of the new directory.
 // If dir is the empty string, TempDir uses the
-// default directory for temporary files (see os.TempDir).
+// default directory for temporary files.
 // Multiple programs calling TempDir simultaneously
 // will not choose the same directory. It is the caller's responsibility
 // to remove the directory when no longer needed.
 func TempDir(dir, pattern string) (string, error) {
+	if len(dir) == 0 && Wrapper.IsVirtual() {
+		dir = VirtualTempDir
+	}
 	return Wrapper.Util.TempDir(dir, pattern)
 }
 
@@ -59,12 +62,15 @@ func TempDir(dir, pattern string) (string, error) {
 // string to the end. If pattern includes a "*", the random string
 // replaces the last "*".
 // If dir is the empty string, TempFile uses the default directory
-// for temporary files (see os.TempDir).
+// for temporary files.
 // Multiple programs calling TempFile simultaneously
 // will not choose the same file. The caller can use f.Name()
 // to find the pathname of the file. It is the caller's responsibility
 // to remove the file when no longer needed.
 func TempFile(dir, pattern string) (os.File, error) {
+	if len(dir) == 0 && Wrapper.IsVirtual() {
+		dir = VirtualTempDir
+	}
 	f, err := Wrapper.Util.TempFile(dir, pattern)
 	return (os.File)(f), err
 }
