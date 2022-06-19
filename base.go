@@ -8,39 +8,55 @@ import (
 	"github.com/spf13/afero"
 )
 
+// data store for wrapper object
 type WrapperStore struct {
-	Fs      afero.Fs
-	Util    *afero.Afero
+	// afero filesystem
+	Fs afero.Fs
+	// afero ioutil
+	Util *afero.Afero
+	// virtual data store
 	Virtual *Virtual
 }
 
+// working mode indicator and data store
 type Virtual struct {
+	// is the current wrapper in virtual mode
 	virtual *bool
-	Data    *VirtualData
+	// current working directory
+	WorkingDirectory string
+	// data store for virtual mode
+	Data *VirtualData
 }
 
+// data store for virtual mode
 type VirtualData struct {
-	Env      map[string]string
+	// pseudo environment
+	Env map[string]string
+	// editable hostname
 	Hostname string
-	Path     string
 }
 
+// wrapper object
 var Wrapper *WrapperStore
 
+// nolint:gochecknoinits
 func init() {
 	newWrapper(false)
 }
 
-func ToVirtual() {
+// initialize new virtual wrapper
+func NewVirtual() {
 	newWrapper(true)
 }
 
+// set wrapper to os mode
 func ToOs() {
 	if Wrapper.IsVirtual() {
 		newWrapper(false)
 	}
 }
 
+// sets current wrapper to new one
 func newWrapper(virtual bool) {
 	var fs afero.Fs
 	if virtual {
@@ -53,66 +69,78 @@ func newWrapper(virtual bool) {
 		Fs: fs,
 	}
 
-	v := Virtual{
+	vs := Virtual{
 		virtual: &virtual,
 	}
 
 	if virtual {
-		v.Data = newVirtualData()
+		vs.Data = newVirtualData()
 	}
 
 	Wrapper = &WrapperStore{
 		Fs:      fs,
 		Util:    &util,
-		Virtual: &v,
+		Virtual: &vs,
 	}
 }
 
+// returns new virtual data store
 func newVirtualData() *VirtualData {
 	hostname := "virtual"
 	if thn, err := oos.Hostname(); err == nil {
 		hostname = thn
 	}
-
 	return &VirtualData{
 		Env:      make(map[string]string),
 		Hostname: hostname,
-		Path:     "/",
 	}
 }
 
+// Is the Wrapper virtual
 func (ws *WrapperStore) IsVirtual() bool {
-	return *Wrapper.Virtual.virtual
+	return ws.Virtual.IsVirtual()
 }
 
+// is the Virtual object virtual
+func (v *Virtual) IsVirtual() bool {
+	return *v.virtual
+}
+
+// get file path prefixed with current working directory if it doesen't start with a slash
 func (ws *WrapperStore) GetPath(fpath string) string {
 	if strings.HasPrefix(fpath, "/") {
 		return fpath
 	} else {
-		return path.Join(ws.Virtual.Data.Path, fpath)
+		return path.Join(ws.Virtual.WorkingDirectory, fpath)
 	}
 }
 
-func (ws *WrapperStore) SyncEnv() error {
-	return ws.onlyWhenVirtual(func() {
+// sync current os environment variables to virtual environment variables
+// returns ErrNotVirtual if Wrapper isen't in virtual mode
+func (v *Virtual) SyncEnv() error {
+	return v.onlyWhenVirtual(func() {
 		oenv := oos.Environ()
 		for _, ec := range oenv {
 			es := strings.Split(ec, "=")
 			if len(es) == 2 {
-				Wrapper.Virtual.Data.Env[es[0]] = es[1]
+				v.Data.Env[es[0]] = es[1]
 			}
 		}
 	})
 }
 
-func (ws *WrapperStore) SetHostname(hostname string) error {
-	return ws.onlyWhenVirtual(func() {
+// set virtual hostname
+// returns ErrNotVirtual if Wrapper isen't in virtual mode
+func (v *Virtual) SetHostname(hostname string) error {
+	return v.onlyWhenVirtual(func() {
 		Wrapper.Virtual.Data.Hostname = hostname
 	})
 }
 
-func (ws *WrapperStore) onlyWhenVirtual(action func()) error {
-	if ws.IsVirtual() {
+// executes action if in virtual mode
+// returns ErrNotVirtual if not in virtual mode
+func (v *Virtual) onlyWhenVirtual(action func()) error {
+	if v.IsVirtual() {
 		action()
 		return nil
 	}
