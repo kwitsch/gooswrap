@@ -28,7 +28,8 @@ var _ = Describe("Value functions", func() {
 		It("Getgroups", func() {
 			oov, ooerr := oos.Getgroups()
 			ov, oerr := os.Getgroups()
-			Expect(oerr).Should(Equal(ooerr))
+			Expect(ooerr).Should(BeNil())
+			Expect(oerr).Should(BeNil())
 			Expect(ov).Should(Equal(oov))
 		})
 		It("Getpagesize", func() {
