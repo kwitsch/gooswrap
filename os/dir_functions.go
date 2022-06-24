@@ -2,6 +2,8 @@ package os
 
 import (
 	oos "os"
+
+	. "github.com/kwitsch/gooswrap"
 )
 
 // TempDir returns the default directory to use for temporary files.
@@ -14,6 +16,9 @@ import (
 // The directory is neither guaranteed to exist nor have accessible
 // permissions.
 func TempDir() string {
+	if Wrapper.IsVirtual() {
+		return VirtualTempDir
+	}
 	return oos.TempDir()
 }
 
@@ -31,7 +36,7 @@ func TempDir() string {
 // If the location cannot be determined (for example, $HOME is not defined),
 // then it will return an error.
 func UserCacheDir() (string, error) {
-	return oos.UserCacheDir()
+	return getDirVal(oos.UserCacheDir, VirtualUserCacheDir)
 }
 
 // UserConfigDir returns the default root directory to use for user-specific
@@ -48,7 +53,7 @@ func UserCacheDir() (string, error) {
 // If the location cannot be determined (for example, $HOME is not defined),
 // then it will return an error.
 func UserConfigDir() (string, error) {
-	return oos.UserConfigDir()
+	return getDirVal(oos.UserConfigDir, VirtualUserConfigDir)
 }
 
 // UserHomeDir returns the current user's home directory.
@@ -57,5 +62,12 @@ func UserConfigDir() (string, error) {
 // On Windows, it returns %USERPROFILE%.
 // On Plan 9, it returns the $home environment variable.
 func UserHomeDir() (string, error) {
-	return oos.UserHomeDir()
+	return getDirVal(oos.UserHomeDir, VirtualUserHomeDir)
+}
+
+func getDirVal(of func() (string, error), vf string) (string, error) {
+	if Wrapper.IsVirtual() {
+		return vf, nil
+	}
+	return of()
 }
