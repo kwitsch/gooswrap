@@ -1,0 +1,17 @@
+name: ginkgo-test
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  ginkgo:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+      - uses: actions/checkout@v2
+      - run: go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
+      - run: $(shell go env GOPATH)/bin/ginkgo -v --coverprofile=coverage.txt --covermode=atomic -cover ./...
