@@ -72,16 +72,27 @@ var _ = Describe("Value functions", func() {
 			wd       string = "/"
 			hostname string = "virtual"
 		)
+		var (
+			err error
+		)
 		BeforeEach(func() {
 			gooswrap.NewVirtual()
-			gooswrap.Wrapper.Virtual.SetEgid(egid)
-			gooswrap.Wrapper.Virtual.SetEuid(euid)
-			gooswrap.Wrapper.Virtual.SetGid(gid)
-			gooswrap.Wrapper.Virtual.SetGroups([]int{group})
-			gooswrap.Wrapper.Virtual.SetPagesize(pagesize)
-			gooswrap.Wrapper.Virtual.SetPid(pid)
-			gooswrap.Wrapper.Virtual.SetPpid(ppid)
-			gooswrap.Wrapper.Virtual.SetUid(uid)
+			err = gooswrap.Wrapper.Virtual.SetEgid(egid)
+			Expect(err).Should(BeNil())
+			err = gooswrap.Wrapper.Virtual.SetEuid(euid)
+			Expect(err).Should(BeNil())
+			err = gooswrap.Wrapper.Virtual.SetGid(gid)
+			Expect(err).Should(BeNil())
+			err = gooswrap.Wrapper.Virtual.SetGroups([]int{group})
+			Expect(err).Should(BeNil())
+			err = gooswrap.Wrapper.Virtual.SetPagesize(pagesize)
+			Expect(err).Should(BeNil())
+			err = gooswrap.Wrapper.Virtual.SetPid(pid)
+			Expect(err).Should(BeNil())
+			err = gooswrap.Wrapper.Virtual.SetPpid(ppid)
+			Expect(err).Should(BeNil())
+			err = gooswrap.Wrapper.Virtual.SetUid(uid)
+			Expect(err).Should(BeNil())
 		})
 		It("Getegid", func() {
 			Expect(os.Getegid()).Should(Equal(egid))
