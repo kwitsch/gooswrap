@@ -32,11 +32,8 @@ var Args []string
 var ErrProcessDone = oos.ErrProcessDone
 
 var (
-	ErrFileClosed = afero.ErrFileClosed
-	ErrOutOfRange = afero.ErrOutOfRange
-	ErrTooLarge   = afero.ErrTooLarge
-	ErrNoReadlink = afero.ErrNoReadlink
-	ErrNoSymlink  = afero.ErrNoSymlink
-	ErrNoLink     = errors.New("link not supported")
-	ErrNoPipe     = errors.New("pipe not supported")
+	ErrFileClosed   = afero.ErrFileClosed
+	ErrOutOfRange   = afero.ErrOutOfRange
+	ErrTooLarge     = afero.ErrTooLarge
+	ErrNotSUpported = errors.New("not supported in virtual mode")
 )
