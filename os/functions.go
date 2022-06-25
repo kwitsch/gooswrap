@@ -68,7 +68,7 @@ func Link(oldname, newname string) error {
 	if !Wrapper.IsVirtual() {
 		return oos.Link(oldname, newname)
 	} else {
-		return ErrNotSUpported
+		return ErrNotSupported
 	}
 }
 
@@ -92,7 +92,7 @@ func Pipe() (*oos.File, *oos.File, error) {
 	if !Wrapper.IsVirtual() {
 		return oos.Pipe()
 	} else {
-		return nil, nil, ErrNotSUpported
+		return nil, nil, ErrNotSupported
 	}
 }
 
@@ -104,7 +104,7 @@ func Readlink(name string) (string, error) {
 	if !Wrapper.IsVirtual() {
 		return oos.Readlink(name)
 	} else {
-		return "", ErrNotSUpported
+		return "", ErrNotSupported
 	}
 }
 
@@ -128,7 +128,7 @@ func Symlink(oldname, newname string) error {
 	if !Wrapper.IsVirtual() {
 		return oos.Symlink(oldname, newname)
 	} else {
-		return ErrNotSUpported
+		return ErrNotSupported
 	}
 }
 

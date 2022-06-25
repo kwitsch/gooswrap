@@ -35,5 +35,5 @@ var (
 	ErrFileClosed   = afero.ErrFileClosed
 	ErrOutOfRange   = afero.ErrOutOfRange
 	ErrTooLarge     = afero.ErrTooLarge
-	ErrNotSUpported = errors.New("not supported in virtual mode")
+	ErrNotSupported = errors.New("not supported in virtual mode")
 )

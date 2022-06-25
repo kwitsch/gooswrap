@@ -28,6 +28,7 @@ import (
 
 A virtual environment can be initialized with `gooswrap.NewVirtual()`.  
 After that several values specified can be set in the virtual environment.  
+Some methodes will return `ErrNotSupported` in virtual mode as not all functions can be virtulaized.  
 
 Ginkgo example:
 
