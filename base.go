@@ -40,6 +40,8 @@ func ToOs() {
 
 // sets current wrapper to new one
 func newWrapper(virtual bool) {
+	Wrapper.clear()
+
 	var idm avfs.IdentityMgr
 	if virtual {
 		idm = memidm.New()
@@ -69,4 +71,11 @@ func newWrapper(virtual bool) {
 // Is the Wrapper virtual
 func (ws *WrapperStore) IsVirtual() bool {
 	return (ws.Virtual != nil)
+}
+
+// clears virtual directory
+func (ws *WrapperStore) clear() {
+	if ws.IsVirtual() {
+		ws.Fs.RemoveAll("/")
+	}
 }
