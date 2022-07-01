@@ -6,15 +6,15 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/spf13/afero"
+	"github.com/avfs/avfs"
+	"github.com/avfs/avfs/vfs/memfs"
+	"github.com/avfs/avfs/vfs/osfs"
 )
 
 // data store for wrapper object
 type WrapperStore struct {
-	// afero filesystem
-	Fs afero.Fs
-	// afero ioutil
-	Util *afero.Afero
+	// filesystem wrapper
+	Fs avfs.VFS
 	// current working directory
 	WorkingDirectory string
 	// virtual data store
@@ -43,11 +43,11 @@ func ToOs() {
 
 // sets current wrapper to new one
 func newWrapper(virtual bool) {
-	var fs afero.Fs
+	var fs avfs.VFS
 	if virtual {
-		fs = afero.NewMemMapFs()
+		fs = memfs.New(memfs.WithMainDirs())
 	} else {
-		fs = afero.NewOsFs()
+		fs = osfs.New()
 	}
 
 	wd := "/"
@@ -57,13 +57,8 @@ func newWrapper(virtual bool) {
 		}
 	}
 
-	util := afero.Afero{
-		Fs: fs,
-	}
-
 	wrapper := WrapperStore{
 		Fs:               fs,
-		Util:             &util,
 		WorkingDirectory: wd,
 	}
 

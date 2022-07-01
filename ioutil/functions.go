@@ -3,7 +3,6 @@ package ioutil
 import (
 	"io"
 	ofs "io/fs"
-	oos "os"
 
 	. "github.com/kwitsch/gooswrap"
 	"github.com/kwitsch/gooswrap/os"
@@ -28,8 +27,8 @@ func ReadAll(r io.Reader) ([]byte, error) {
 // sorted by filename. If an error occurs reading the directory,
 // ReadDir returns no directory entries along with the error.
 func ReadDir(dirname string) ([]os.FileInfo, error) {
-	fi, err := Wrapper.Util.ReadDir(dirname)
-	return fromOosFilesInfo(fi), err
+	de, err := Wrapper.Fs.ReadDir(dirname)
+	return fromOfsDirEntry(de), err
 }
 
 // ReadFile reads the file named by filename and returns the contents.
@@ -37,7 +36,7 @@ func ReadDir(dirname string) ([]os.FileInfo, error) {
 // reads the whole file, it does not treat an EOF from Read as an error
 // to be reported.
 func ReadFile(filename string) ([]byte, error) {
-	return Wrapper.Util.ReadFile(filename)
+	return Wrapper.Fs.ReadFile(filename)
 }
 
 // TempDir creates a new temporary directory in the directory dir.
@@ -50,10 +49,7 @@ func ReadFile(filename string) ([]byte, error) {
 // will not choose the same directory. It is the caller's responsibility
 // to remove the directory when no longer needed.
 func TempDir(dir, pattern string) (string, error) {
-	if len(dir) == 0 && Wrapper.IsVirtual() {
-		dir = VirtualTempDir
-	}
-	return Wrapper.Util.TempDir(dir, pattern)
+	return Wrapper.Fs.MkdirTemp(dir, pattern)
 }
 
 // TempFile creates a new temporary file in the directory dir,
@@ -68,24 +64,22 @@ func TempDir(dir, pattern string) (string, error) {
 // to find the pathname of the file. It is the caller's responsibility
 // to remove the file when no longer needed.
 func TempFile(dir, pattern string) (os.File, error) {
-	if len(dir) == 0 && Wrapper.IsVirtual() {
-		dir = VirtualTempDir
-	}
-	f, err := Wrapper.Util.TempFile(dir, pattern)
-	return (os.File)(f), err
+	return Wrapper.Fs.CreateTemp(dir, pattern)
 }
 
 // WriteFile writes data to a file named by filename.
 // If the file does not exist, WriteFile creates it with permissions perm
 // (before umask); otherwise WriteFile truncates it before writing, without changing permissions.
 func WriteFile(filename string, data []byte, perm os.FileMode) error {
-	return Wrapper.Util.WriteFile(filename, data, (ofs.FileMode)(perm))
+	return Wrapper.Fs.WriteFile(filename, data, ofs.FileMode(perm))
 }
 
-func fromOosFilesInfo(ofi []oos.FileInfo) []os.FileInfo {
-	res := make([]os.FileInfo, len(ofi))
-	for i, fi := range ofi {
-		res[i] = (os.FileInfo)(fi)
+func fromOfsDirEntry(ofde []ofs.DirEntry) []os.FileInfo {
+	res := make([]os.FileInfo, len(ofde))
+	for i, de := range ofde {
+		if fi, err := de.Info(); err == nil {
+			res[i] = (os.FileInfo)(fi)
+		}
 	}
 	return res
 }

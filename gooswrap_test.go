@@ -222,43 +222,5 @@ var _ = Describe("Gooswrap", func() {
 			Expect(gooswrap.Wrapper.Virtual.Env).Should(HaveKey(envKey))
 			Expect(gooswrap.Wrapper.Virtual.Env[envKey]).Should(Equal(envValue))
 		})
-		It("can execute SyncEnv", func() {
-			var exists bool
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualTempDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeFalse())
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualUserCacheDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeFalse())
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualUserConfigDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeFalse())
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualUserHomeDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeFalse())
-
-			err = gooswrap.Wrapper.Virtual.InitDirectories()
-			Expect(err).Should(BeNil())
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualTempDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeTrue())
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualUserCacheDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeTrue())
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualUserConfigDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeTrue())
-
-			exists, err = gooswrap.Wrapper.Util.DirExists(gooswrap.VirtualUserHomeDir)
-			Expect(err).Should(BeNil())
-			Expect(exists).Should(BeTrue())
-		})
 	})
 })
