@@ -2,6 +2,8 @@ package gooswrap
 
 import (
 	"github.com/avfs/avfs"
+	"github.com/avfs/avfs/idm/memidm"
+	"github.com/avfs/avfs/idm/osidm"
 	"github.com/avfs/avfs/vfs/memfs"
 	"github.com/avfs/avfs/vfs/osfs"
 )
@@ -10,6 +12,8 @@ import (
 type WrapperStore struct {
 	// filesystem wrapper
 	Fs avfs.VFS
+	// Identity manager
+	Idm avfs.IdentityMgr
 	// virtual data store
 	Virtual *VirtualData
 }
@@ -36,15 +40,23 @@ func ToOs() {
 
 // sets current wrapper to new one
 func newWrapper(virtual bool) {
+	var idm avfs.IdentityMgr
+	if virtual {
+		idm = memidm.New()
+	} else {
+		idm = osidm.New()
+	}
+
 	var fs avfs.VFS
 	if virtual {
-		fs = memfs.New(memfs.WithMainDirs())
+		fs = memfs.New(memfs.WithMainDirs(), memfs.WithIdm(idm))
 	} else {
 		fs = osfs.New()
 	}
 
 	wrapper := WrapperStore{
-		Fs: fs,
+		Fs:  fs,
+		Idm: idm,
 	}
 
 	if virtual {
