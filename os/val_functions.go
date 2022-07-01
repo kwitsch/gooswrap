@@ -42,11 +42,7 @@ func Getuid() int {
 }
 
 func Getwd() (string, error) {
-	if !Wrapper.IsVirtual() {
-		return oos.Getwd()
-	} else {
-		return Wrapper.WorkingDirectory, nil
-	}
+	return Wrapper.Fs.Getwd()
 }
 
 func Hostname() (string, error) {

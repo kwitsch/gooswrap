@@ -1,11 +1,6 @@
 package gooswrap
 
 import (
-	oos "os"
-	"path"
-	"regexp"
-	"strings"
-
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
 	"github.com/avfs/avfs/vfs/osfs"
@@ -15,8 +10,6 @@ import (
 type WrapperStore struct {
 	// filesystem wrapper
 	Fs avfs.VFS
-	// current working directory
-	WorkingDirectory string
 	// virtual data store
 	Virtual *VirtualData
 }
@@ -50,16 +43,8 @@ func newWrapper(virtual bool) {
 		fs = osfs.New()
 	}
 
-	wd := "/"
-	if !virtual {
-		if dir, err := oos.Getwd(); err == nil {
-			wd = dir
-		}
-	}
-
 	wrapper := WrapperStore{
-		Fs:               fs,
-		WorkingDirectory: wd,
+		Fs: fs,
 	}
 
 	if virtual {
@@ -72,14 +57,4 @@ func newWrapper(virtual bool) {
 // Is the Wrapper virtual
 func (ws *WrapperStore) IsVirtual() bool {
 	return (ws.Virtual != nil)
-}
-
-// get file path prefixed with current working directory if it doesen't start with a slash
-func (ws *WrapperStore) GetPath(fpath string) string {
-	match, _ := regexp.MatchString("^[A-Z]:.*", fpath)
-	if match || strings.HasPrefix(fpath, "/") {
-		return fpath
-	} else {
-		return path.Join(ws.WorkingDirectory, fpath)
-	}
 }

@@ -25,11 +25,6 @@ var _ = Describe("Gooswrap", func() {
 		BeforeEach(func() {
 			gooswrap.ToOs()
 		})
-		It("has correct working directory", func() {
-			wd, err := oos.Getwd()
-			Expect(err).Should(BeNil())
-			Expect(gooswrap.Wrapper.WorkingDirectory).Should(Equal(wd))
-		})
 		It("is not virtual", func() {
 			v := gooswrap.Wrapper.IsVirtual()
 			Expect(v).Should(BeFalse())
@@ -90,9 +85,6 @@ var _ = Describe("Gooswrap", func() {
 		BeforeEach(func() {
 			gooswrap.NewVirtual()
 			id = 0
-		})
-		It("has correct working directory", func() {
-			Expect(gooswrap.Wrapper.WorkingDirectory).Should(Equal(rootPath))
 		})
 		It("is virtual", func() {
 			v := gooswrap.Wrapper.IsVirtual()

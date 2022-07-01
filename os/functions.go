@@ -9,35 +9,19 @@ import (
 )
 
 func Chdir(dir string) error {
-	if !Wrapper.IsVirtual() {
-		err := oos.Chdir(dir)
-		if err == nil {
-			Wrapper.WorkingDirectory = dir
-		}
-		return err
-	} else {
-		exists, err := Wrapper.Util.DirExists(dir)
-		if err != nil {
-			return nil
-		} else if !exists {
-			return ErrNotExist
-		} else {
-			Wrapper.WorkingDirectory = dir
-			return nil
-		}
-	}
+	return Wrapper.Fs.Chdir(dir)
 }
 
 func Chmod(name string, mode FileMode) error {
-	return Wrapper.Fs.Chmod(Wrapper.GetPath(name), (fs.FileMode)(mode))
+	return Wrapper.Fs.Chmod(name, (fs.FileMode)(mode))
 }
 
 func Chown(name string, uid, gid int) error {
-	return Wrapper.Fs.Chown(Wrapper.GetPath(name), uid, gid)
+	return Wrapper.Fs.Chown(name, uid, gid)
 }
 
 func Chtimes(name string, atime time.Time, mtime time.Time) error {
-	return Wrapper.Fs.Chtimes(Wrapper.GetPath(name), atime, mtime)
+	return Wrapper.Fs.Chtimes(name, atime, mtime)
 }
 
 func DirFS(dir string) fs.FS {
@@ -60,7 +44,7 @@ func Lchown(name string, uid, gid int) error {
 	if !Wrapper.IsVirtual() {
 		return oos.Lchown(name, uid, gid)
 	} else {
-		return Wrapper.Fs.Chown(Wrapper.GetPath(name), uid, gid)
+		return Wrapper.Fs.Chown(name, uid, gid)
 	}
 }
 
@@ -73,11 +57,11 @@ func Link(oldname, newname string) error {
 }
 
 func Mkdir(name string, perm FileMode) error {
-	return Wrapper.Fs.Mkdir(Wrapper.GetPath(name), (oos.FileMode)(perm))
+	return Wrapper.Fs.Mkdir(name, (oos.FileMode)(perm))
 }
 
 func MkdirAll(path string, perm FileMode) error {
-	return Wrapper.Fs.MkdirAll(Wrapper.GetPath(path), (oos.FileMode)(perm))
+	return Wrapper.Fs.MkdirAll(path, (oos.FileMode)(perm))
 }
 
 func MkdirTemp(dir, pattern string) (string, error) {
@@ -97,7 +81,7 @@ func Pipe() (*oos.File, *oos.File, error) {
 }
 
 func ReadFile(name string) ([]byte, error) {
-	return Wrapper.Util.ReadFile(Wrapper.GetPath(name))
+	return Wrapper.Fs.ReadFile(name)
 }
 
 func Readlink(name string) (string, error) {
@@ -109,15 +93,15 @@ func Readlink(name string) (string, error) {
 }
 
 func Remove(name string) error {
-	return Wrapper.Fs.Remove(Wrapper.GetPath(name))
+	return Wrapper.Fs.Remove(name)
 }
 
 func RemoveAll(path string) error {
-	return Wrapper.Fs.RemoveAll(Wrapper.GetPath(path))
+	return Wrapper.Fs.RemoveAll(path)
 }
 
 func Rename(oldpath, newpath string) error {
-	return Wrapper.Fs.Rename(Wrapper.GetPath(oldpath), Wrapper.GetPath(newpath))
+	return Wrapper.Fs.Rename(oldpath, newpath)
 }
 
 func SameFile(fi1, fi2 FileInfo) bool {
@@ -137,7 +121,7 @@ func Truncate(name string, size int64) error {
 }
 
 func WriteFile(name string, data []byte, perm FileMode) error {
-	return Wrapper.Util.WriteFile(Wrapper.GetPath(name), data, (oos.FileMode)(perm))
+	return Wrapper.Fs.WriteFile(name, data, (oos.FileMode)(perm))
 }
 
 func IsPathSeparator(c uint8) bool {
