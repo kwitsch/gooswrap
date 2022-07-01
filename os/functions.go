@@ -41,19 +41,11 @@ func Expand(s string, mapping func(string) string) string {
 }
 
 func Lchown(name string, uid, gid int) error {
-	if !Wrapper.IsVirtual() {
-		return oos.Lchown(name, uid, gid)
-	} else {
-		return Wrapper.Fs.Chown(name, uid, gid)
-	}
+	return Wrapper.Fs.Lchown(name, uid, gid)
 }
 
 func Link(oldname, newname string) error {
-	if !Wrapper.IsVirtual() {
-		return oos.Link(oldname, newname)
-	} else {
-		return ErrNotSupported
-	}
+	return Wrapper.Fs.Link(oldname, newname)
 }
 
 func Mkdir(name string, perm FileMode) error {
@@ -65,7 +57,7 @@ func MkdirAll(path string, perm FileMode) error {
 }
 
 func MkdirTemp(dir, pattern string) (string, error) {
-	return oos.MkdirTemp(dir, pattern)
+	return Wrapper.Fs.MkdirTemp(dir, pattern)
 }
 
 func NewSyscallError(syscall string, err error) error {
@@ -85,11 +77,7 @@ func ReadFile(name string) ([]byte, error) {
 }
 
 func Readlink(name string) (string, error) {
-	if !Wrapper.IsVirtual() {
-		return oos.Readlink(name)
-	} else {
-		return "", ErrNotSupported
-	}
+	return Wrapper.Fs.Readlink(name)
 }
 
 func Remove(name string) error {
@@ -109,15 +97,11 @@ func SameFile(fi1, fi2 FileInfo) bool {
 }
 
 func Symlink(oldname, newname string) error {
-	if !Wrapper.IsVirtual() {
-		return oos.Symlink(oldname, newname)
-	} else {
-		return ErrNotSupported
-	}
+	return Wrapper.Fs.Symlink(oldname, newname)
 }
 
 func Truncate(name string, size int64) error {
-	return oos.Truncate(name, size)
+	return Wrapper.Fs.Truncate(name, size)
 }
 
 func WriteFile(name string, data []byte, perm FileMode) error {

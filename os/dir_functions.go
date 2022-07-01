@@ -16,10 +16,7 @@ import (
 // The directory is neither guaranteed to exist nor have accessible
 // permissions.
 func TempDir() string {
-	if Wrapper.IsVirtual() {
-		return VirtualTempDir
-	}
-	return oos.TempDir()
+	return Wrapper.Fs.TempDir()
 }
 
 // UserCacheDir returns the default root directory to use for user-specific
