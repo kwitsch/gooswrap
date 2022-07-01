@@ -1,6 +1,8 @@
 package os_test
 
 import (
+	"github.com/avfs/avfs/idm/memidm"
+	"github.com/avfs/avfs/vfs/memfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -28,8 +30,7 @@ var _ = Describe("Value functions", func() {
 		It("Getgroups", func() {
 			oov, ooerr := oos.Getgroups()
 			ov, oerr := os.Getgroups()
-			Expect(ooerr).Should(BeNil())
-			Expect(oerr).Should(BeNil())
+			Expect(oerr).Should(Equal(ooerr))
 			Expect(ov).Should(Equal(oov))
 		})
 		It("Getpagesize", func() {
@@ -70,7 +71,6 @@ var _ = Describe("Value functions", func() {
 			pid      int    = 996
 			ppid     int    = 997
 			uid      int    = 998
-			wd       string = "/"
 			hostname string = "virtual"
 		)
 		var (
@@ -123,9 +123,11 @@ var _ = Describe("Value functions", func() {
 			Expect(os.Getuid()).Should(Equal(uid))
 		})
 		It("Getwd", func() {
+			av, aerr := memfs.New(memfs.WithMainDirs(), memfs.WithIdm(memidm.New())).Getwd()
+			Expect(aerr).Should(BeNil())
 			ov, oerr := os.Getwd()
 			Expect(oerr).Should(BeNil())
-			Expect(ov).Should(Equal(wd))
+			Expect(ov).Should(Equal(av))
 		})
 		It("Hostname", func() {
 			ov, oerr := os.Hostname()

@@ -1,6 +1,8 @@
 package os_test
 
 import (
+	"github.com/avfs/avfs/idm/memidm"
+	"github.com/avfs/avfs/vfs/memfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -48,7 +50,8 @@ var _ = Describe("Directory functions", func() {
 			gooswrap.NewVirtual()
 		})
 		It("TempDir", func() {
-			Expect(os.TempDir()).Should(Equal(gooswrap.VirtualTempDir))
+			tmpFs := memfs.New(memfs.WithMainDirs(), memfs.WithIdm(memidm.New()))
+			Expect(os.TempDir()).Should(Equal(tmpFs.TempDir()))
 		})
 		It("UserCacheDir", func() {
 			ov, err = os.UserCacheDir()

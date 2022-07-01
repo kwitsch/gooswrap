@@ -202,9 +202,6 @@ func (v *VirtualData) SyncEnv() error {
 // returns ErrNotVirtual if Wrapper isen't in virtual mode
 func (v *VirtualData) InitDirectories() error {
 	return onlyWhenVirtualError(v, func() error {
-		if err := Wrapper.Fs.MkdirAll(VirtualTempDir, 0777); err != nil {
-			return err
-		}
 		if err := Wrapper.Fs.MkdirAll(VirtualUserCacheDir, 0777); err != nil {
 			return err
 		}
